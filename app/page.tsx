@@ -52,7 +52,13 @@ const STATUS_CLASSES: Record<Status, string> = {
 };
 
 export default function Home() {
-  const [secret, setSecret] = useState(pickWord);
+  const [secret, setSecret] = useState("");
+
+// Pick the word in the browser only, after the page loads
+useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  setSecret(pickWord());
+}, []);
   const [guesses, setGuesses] = useState<string[]>(Array(ROWS).fill(""));
   const [row, setRow] = useState(0); // the row currently being typed in
 
@@ -69,7 +75,7 @@ export default function Home() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (gameOver) return;
+      if (gameOver || !secret) return;
 
       if (/^[a-zA-Z]$/.test(e.key)) {
         setGuesses((prev) => {
@@ -93,7 +99,7 @@ export default function Home() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [row, guesses, gameOver]);
+  }, [row, guesses, gameOver, secret]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-900 p-4 text-white">
