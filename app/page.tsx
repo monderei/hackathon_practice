@@ -14,6 +14,10 @@ const WORDS = [
 
 type Status = "correct" | "present" | "absent";
 
+function pickWord(): string {
+  return WORDS[Math.floor(Math.random() * WORDS.length)];
+}
+
 // Two passes so repeated letters are handled correctly
 function evaluate(guess: string, secret: string): Status[] {
   const result: Status[] = Array(COLS).fill("absent");
@@ -48,13 +52,19 @@ const STATUS_CLASSES: Record<Status, string> = {
 };
 
 export default function Home() {
-  const [secret] = useState(() => WORDS[Math.floor(Math.random() * WORDS.length)]);
+  const [secret, setSecret] = useState(pickWord);
   const [guesses, setGuesses] = useState<string[]>(Array(ROWS).fill(""));
   const [row, setRow] = useState(0); // the row currently being typed in
 
   const won = row > 0 && guesses[row - 1] === secret;
   const lost = !won && row >= ROWS;
   const gameOver = won || lost;
+
+  function playAgain() {
+    setGuesses(Array(ROWS).fill(""));
+    setRow(0);
+    setSecret(pickWord());
+  }
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -123,6 +133,15 @@ export default function Home() {
         <p className="text-xl font-semibold text-red-400">
           Out of guesses. The word was {secret}.
         </p>
+      )}
+
+      {gameOver && (
+        <button
+          onClick={playAgain}
+          className="rounded bg-green-600 px-5 py-2 font-semibold text-white hover:bg-green-500"
+        >
+          Play Again
+        </button>
       )}
     </main>
   );
